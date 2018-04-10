@@ -1,0 +1,17 @@
+100,Jade Long,0,null,100
+101,Tom Bob,1,null,101
+102,Blond Gold,0,null,102
+103,Moo Smith,0,null,103
+104,Kid wood,0,null,104
+105,Chin Wing,0,null,105
+106,Add Less,0,null,106
+107,Tim Gibs,0,null,107
+108,Chris Dude,1,04-57-17,108
+109,Dave Move,1,04-01-17,109
+110,Con Moo,1,null,110
+111,John Smith,0,null,111
+112,Nuget Barr,0,null,112
+113,Csitres Ball,0,null,113
+114,Pizz Hutt,0,null,114
+115,Win Wong,0,null,115
+116,Dude,0,null,116

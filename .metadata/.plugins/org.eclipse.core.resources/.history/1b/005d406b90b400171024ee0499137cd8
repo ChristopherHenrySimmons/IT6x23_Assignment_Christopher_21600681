@@ -1,0 +1,886 @@
+package EpicVotingSystem;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.sql.Date;
+import java.text.DateFormat;
+import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.Scanner;
+import java.util.StringTokenizer;
+
+
+public class Manage {
+	 private BufferedReader in = new BufferedReader( new InputStreamReader( System.in ));
+	 private VotingController vc;
+	//Input Reader
+    private String getInput()
+    {
+       String theInput = "";
+
+       try
+       {
+           theInput = in.readLine().trim();
+       }
+       catch(IOException e)
+       {
+           System.out.println(e);
+       }
+       return theInput;
+    }
+    //ERROR May have something to do with input
+    Scanner input = new Scanner(System.in);
+
+    
+	 //-----------------------------STAFF MANAGE------------------------------
+    public boolean ManageStaff()
+    {
+       boolean adminQuit = false;
+       boolean systemQuit = false;
+
+       System.out.println("\n\t\t===================== Manage =====================\n\n");
+       
+       while (!adminQuit){
+           System.out.println("\t\t Staff Information System\n\n");
+	    
+	        System.out.println("\"A\" :Add New Staff Record ");
+	        System.out.println("\"V\" :View All Staff Record ");	
+	        System.out.println("\"D\" :Delete Staff Record ");
+	        
+	        
+	        System.out.println("\"Q\" :To Quit Back To Main Menu");
+	    
+	        System.out.print("\n\n");
+	        System.out.println("Enter your choice: ");
+           String input = getInput();
+			
+           if (input.equalsIgnoreCase("A"))
+           {
+               try {
+				AddRecord();
+				adminQuit = false;
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
+           }
+           else if(input.equalsIgnoreCase("V"))
+           {
+               try {
+				ViewAllRecord();
+				adminQuit = false;
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
+               
+               
+           }
+           else if(input.equalsIgnoreCase("D"))
+           {
+           	
+           	try {
+				DeleteRecordByID();
+				adminQuit = false;
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
+           	
+           }
+           else if(input.equalsIgnoreCase("U"))
+           {
+           	try {
+				updateRecordbyID();
+				adminQuit = false;
+			} catch (IOException e) {
+				
+				e.printStackTrace();
+			}
+           	if(input.equalsIgnoreCase("Q"))
+            {
+            	adminQuit = true;
+            	System.out.println("Good Bye!!!");
+            }
+           	
+           }
+           else
+           {
+        	   System.out.println("Good Bye... : \n\n");
+               adminQuit = true;
+           }
+       }
+       return systemQuit;
+    }
+        // needs } but then gives error - FIXED
+        
+        
+        //Create setter method add record
+        public void AddRecord() throws IOException {
+    		
+    		BufferedWriter bw = new BufferedWriter( new FileWriter("staff.txt",true) );
+    		Scanner input = new Scanner(System.in);
+    		
+    		String ID, name, Date = null, Password;
+    		int voted = 0;
+    		
+    		System.out.print("Enter the Staff ID: ");
+    		ID = input.nextLine();
+    		System.out.print("Enter the Staff Name: ");
+    		name = input.nextLine();
+    		System.out.print("Enter the Staff Password: ");
+    		Password = input.nextLine();
+    		    		
+    		   		
+    		bw.write(ID+","+name+","+voted+","+Date+","+Password);
+    		bw.flush();
+    		bw.newLine();
+    		bw.close();	
+        }
+    	//Setter Method for veiw record
+    		public void ViewAllRecord() throws IOException {
+    	    	BufferedReader br = new BufferedReader( new FileReader("staff.txt") );
+    	    		
+    	    	String record;
+    	    		
+    	    	System.out.println("      ------------------------------------------------------------------------------");
+    	    	System.out.println("      ID	Name 	      		Voted			Date 		Password	 		    ");
+    	    	System.out.println("      ------------------------------------------------------------------------------");
+    	    		
+    	    	while( ( record = br.readLine() ) != null ) {
+    	    			
+    	    		StringTokenizer st = new StringTokenizer(record,",");
+    	    			
+    	    		System.out.println("      "+st.nextToken()+"	"+st.nextToken()+" 		"+st.nextToken()+"			"+st.nextToken()+" 		"+st.nextToken()+"      ");
+    		
+    	    	}
+    	    		
+    	    	System.out.println("");
+    	    	System.out.println(" -------------------------------------------------------------------------------------");
+    	    	br.close();    		
+    	    		
+    	    }
+    	//Setter method to delete record
+    		
+    		public void DeleteRecordByID() throws IOException {
+        		Scanner input =  new Scanner(System.in);
+        		String ID, record;
+        		
+        		
+        		File tempDB = new File("staff_db_temp.txt");
+        		File db = new File("staff.txt");
+        		
+        		
+        		BufferedReader br = new BufferedReader( new FileReader( db ) );
+        		BufferedWriter bw = new BufferedWriter( new FileWriter( tempDB ) );
+        		
+        		
+        		System.out.println("\t\t Delete Staff Record\n");
+        		
+        		System.out.println("Enter the Staff ID: ");
+        		ID =  input.nextLine();
+        		
+        		
+        		while( ( record = br.readLine() ) != null ) {
+        			
+        			
+        			if( record.contains(ID) ) 
+        				continue;
+       
+        			bw.write(record);
+        			bw.flush();
+        			bw.newLine();
+     
+        		}
+        		
+        		br.close();
+        		bw.close();
+        		
+        		db.delete();
+        		
+        		tempDB.renameTo(db);
+
+        }
+    	//Setter method for search
+    		
+    	//Setter method to update
+    		public void updateRecordbyID() throws IOException {
+        		String newName, newID, newPass, record, ID,record2;
+        		
+        		File db = new File("staff.txt");
+        		File tempDB = new File("staff_db_temp.txt");
+        		
+        		BufferedReader br = new BufferedReader( new FileReader(db) );
+        		BufferedWriter bw = new BufferedWriter( new FileWriter(tempDB) );
+        		    		
+        		Scanner input = new Scanner(System.in);
+        		
+        		System.out.println("\t\t Update Staff Record\n\n");   
+    			
+    			System.out.println("Enter the Staff ID: ");
+    	    		ID = input.nextLine();	    		
+    	    		System.out.println("      ------------------------------------------------------------------------------");
+        	    	System.out.println("      Code	Name  Votes");
+        	    	System.out.println("      ------------------------------------------------------------------------------");
+    	    		
+    	    		while( ( record = br.readLine() ) != null ) {
+    	    			
+    	    			StringTokenizer st = new StringTokenizer(record,",");
+    	    			if( record.contains(ID) ) {
+    	    				System.out.println("      "+st.nextToken()+"	"+st.nextToken()+" 		"+st.nextToken()+"			"+st.nextToken()+" 		"+st.nextToken()+"      ");
+    	    			}
+    	    			//9/10/2017 12.14 pm
+    	    		}	    		
+    	    		System.out.println("");
+    	    		System.out.println(" -------------------------------------------------------------------------------------");
+    	    		
+    	    	br.close();
+    		  	   
+        		System.out.println("Enter the new Name: ");
+        		newName = input.nextLine();    		
+        		System.out.println("Enter the new ID: ");
+        		newID = input.nextLine();  
+        		System.out.println("Enter the new Pass: ");
+        		newPass = input.nextLine();  
+        		
+        		BufferedReader br2 = new BufferedReader( new FileReader(db) );
+        			
+        		while( (record2 = br2.readLine() ) != null ) {    			
+        			if(record2.contains(ID)) {
+        				bw.write(ID+","+newName+","+newID+","+newPass);
+        			} else {
+        			
+        				bw.write(record2);	
+        			}    			
+        			bw.flush();
+        			bw.newLine();
+        		}
+        		
+        		bw.close();
+        		br2.close();    		
+        		db.delete();    		
+        		boolean success = tempDB.renameTo(db);    		
+        		System.out.println(success);    		
+        		
+        }
+    		//----------------------------ADMIN MANAGE-----------------------------------
+    		public boolean Manageadmin()
+    	    {
+    			//ERROR - does not start?
+    			//11/10/2017
+    	       boolean adminQuit = false;
+    	       boolean systemQuit = false;
+
+    	       System.out.println("\n\t\t===================== Manage =====================\n\n");
+    	       
+    	       while (!adminQuit){
+    	           System.out.println("\t\t admin Information System\n\n");
+    		    
+    		        System.out.println("\"A\" :Add New admin Record ");
+    		        System.out.println("\"V\" :View All admin Record ");	
+    		        System.out.println("\"D\" :Delete admin Record ");
+    		        
+    		        
+    		        System.out.println("\"Q\" :To Quit Back To Main Menu");
+    		    
+    		        System.out.print("\n\n");
+    		        System.out.println("Enter your choice: ");
+    	           String input = getInput();
+    				
+    	           if (input.equalsIgnoreCase("A"))
+    	           {
+    	               try {
+    					aAddRecord();
+    					adminQuit = false;
+    				} catch (IOException e) {
+    					
+    					e.printStackTrace();
+    				}
+    	           }
+    	           else if(input.equalsIgnoreCase("V"))
+    	           {
+    	               try {
+    					aViewAllRecord();
+    					adminQuit = false;
+    				} catch (IOException e) {
+    					
+    					e.printStackTrace();
+    				}
+    	               
+    	               
+    	           }
+    	           else if(input.equalsIgnoreCase("D"))
+    	           {
+    	           
+    	           	try {
+    					aDeleteRecordByID();
+    					adminQuit = false;
+    				} catch (IOException e) {
+    					
+    					e.printStackTrace();
+    				}
+    	           	
+    	           }
+    	           else if(input.equalsIgnoreCase("U"))
+    	           {
+    	           	try {
+    					aupdateRecordbyID();
+    					adminQuit = false;
+    				} catch (IOException e) {
+    					
+    					e.printStackTrace();
+    				}
+    	           	if(input.equalsIgnoreCase("Q"))
+    	            {
+    	            	adminQuit = true;
+    	            	System.out.println("Good Bye!!!");
+    	            }
+    	           	
+    	           }
+    	           
+    	           else
+    	           {
+    	               System.out.println("Good Bye... : \n\n");
+    	               adminQuit = true;
+    	           }
+    	       }
+    	       return systemQuit;
+    	    }
+    	        // needs } but then gives error - FIXED
+    	        
+    	        
+    	        //Create setter method add record
+    	        public void aAddRecord() throws IOException {
+    	    		
+    	    		BufferedWriter bw = new BufferedWriter( new FileWriter("admin.txt",true) );
+    	    		Scanner input = new Scanner(System.in);
+    	    		
+    	    		String ID, name, Date = null,Username,  Password;
+    	    		int voted = 0;
+    	    		
+    	    		System.out.print("Enter the admin ID: ");
+    	    		ID = input.nextLine();
+    	    		System.out.print("Enter the admin Name: ");
+    	    		name = input.nextLine();
+    	    		System.out.print("Enter the admin Username: ");
+    	    		Username = input.nextLine();
+    	    		System.out.print("Enter the admin Password: ");
+    	    		Password = input.nextLine();
+    	    		    		
+    	    		   		
+    	    		bw.write(ID+","+name+","+Username+","+Password);
+    	    		bw.flush();
+    	    		bw.newLine();
+    	    		bw.close();	
+    	        }
+    	    	//Setter Method for veiw record
+    	    		public void aViewAllRecord() throws IOException {
+    	    	    	BufferedReader br = new BufferedReader( new FileReader("admin.txt") );
+    	    	    		
+    	    	    	String record;
+    	    	    		
+    	    	    	System.out.println("      ------------------------------------------------------------------");
+    	    	    	System.out.println("      ID	Name 	      		Username 		Password	 		    ");
+    	    	    	System.out.println("      ------------------------------------------------------------------");
+    	    	    		
+    	    	    	while( ( record = br.readLine() ) != null ) {
+    	    	    			
+    	    	    		StringTokenizer st = new StringTokenizer(record,",");
+    	    	    			
+    	    	    		System.out.println("      "+st.nextToken()+"	"+st.nextToken()+" 		"+st.nextToken()+"			"+st.nextToken());
+    	    		
+    	    	    	}
+    	    	    		
+    	    	    	System.out.println("");
+    	    	    	System.out.println(" -------------------------------------------------------------------------------------");
+    	    	    	br.close();    		
+    	    	    		
+    	    	    }
+    	    	//Setter method to delete record
+    	    		
+    	    		public void aDeleteRecordByID() throws IOException {
+    	        		Scanner input =  new Scanner(System.in);
+    	        		String ID, record;
+    	        		
+    	        		
+    	        		File tempDB = new File("admin_db_temp.txt");
+    	        		File db = new File("admin.txt");
+    	        		
+    	        		
+    	        		BufferedReader br = new BufferedReader( new FileReader( db ) );
+    	        		BufferedWriter bw = new BufferedWriter( new FileWriter( tempDB ) );
+    	        		
+    	        		
+    	        		System.out.println("\t\t Delete admin Record\n");
+    	        		
+    	        		System.out.println("Enter the admin ID: ");
+    	        		ID =  input.nextLine();
+    	        		
+    	        		
+    	        		while( ( record = br.readLine() ) != null ) {
+    	        			
+    	        			
+    	        			if( record.contains(ID) ) 
+    	        				continue;
+    	       
+    	        			bw.write(record);
+    	        			bw.flush();
+    	        			bw.newLine();
+    	     
+    	        		}
+    	        		
+    	        		br.close();
+    	        		bw.close();
+    	        		
+    	        		db.delete();
+    	        		
+    	        		tempDB.renameTo(db);
+
+    	        }
+    	    	//Setter method for search
+    	    		
+    	    	//Setter method to update
+    	    		public void aupdateRecordbyID() throws IOException {
+    	        		String newName, newID, newPass, record, ID,record2;
+    	        		
+    	        		File db = new File("admin.txt");
+    	        		File tempDB = new File("admin_db_temp.txt");
+    	        		
+    	        		BufferedReader br = new BufferedReader( new FileReader(db) );
+    	        		BufferedWriter bw = new BufferedWriter( new FileWriter(tempDB) );
+    	        		    		
+    	        		Scanner input = new Scanner(System.in);
+    	        		
+    	        		System.out.println("\t\t Update admin Record\n\n");   
+    	    			
+    	    			System.out.println("Enter the admin ID: ");
+    	    	    		ID = input.nextLine();	    		
+    	    	    		System.out.println("      ------------------------------------------------------------------");
+        	    	    	System.out.println("      ID	Name 	      		Username 		Password	 		    ");
+        	    	    	System.out.println("      ------------------------------------------------------------------");
+    	    	    		
+    	    	    		while( ( record = br.readLine() ) != null ) {
+    	    	    			
+    	    	    			StringTokenizer st = new StringTokenizer(record,",");
+    	    	    			if( record.contains(ID) ) {
+    	    	    				System.out.println("      "+st.nextToken()+"	"+st.nextToken()+" 		"+st.nextToken()+"			"+st.nextToken());
+    	    	    			}
+    	    	    			//9/10/2017 12.14 pm
+    	    	    		}	    		
+    	    	    		System.out.println("");
+    	    	    		System.out.println(" ------------------------------------------------------------- ");
+    	    	    		
+    	    	    	br.close();
+    	    		  	   
+    	        		System.out.println("Enter the new Name: ");
+    	        		newName = input.nextLine();    		
+    	        		System.out.println("Enter the new ID: ");
+    	        		newID = input.nextLine();  
+    	        		System.out.println("Enter the new Password: ");
+    	        		newPass = input.nextLine();  
+    	        		
+    	        		BufferedReader br2 = new BufferedReader( new FileReader(db) );
+    	        			
+    	        		while( (record2 = br2.readLine() ) != null ) {    			
+    	        			if(record2.contains(ID)) {
+    	        				bw.write(ID+","+newName+","+newID+","+newPass);
+    	        			} else {
+    	        			
+    	        				bw.write(record2);	
+    	        			}    			
+    	        			bw.flush();
+    	        			bw.newLine();
+    	        		}
+    	        		
+    	        		bw.close();
+    	        		br2.close();    		
+    	        		db.delete();    		
+    	        		boolean success = tempDB.renameTo(db);    		
+    	        		System.out.println(success);    		
+    	        		
+    	        }
+    	    		
+    	    		//------------------------------CANDIDATE MANAGE---------------------------------
+    	    	     public boolean Managecandidate()
+    	    	     {
+    	    	        boolean candidateQuit = false;
+    	    	        boolean systemQuit = false;
+
+    	    	        System.out.println("\n\t\t===================== Manage =====================\n\n");
+    	    	        
+    	    	        while (!candidateQuit){
+    	    	            System.out.println("\t\t candidate Information System\n\n");
+    	    	 	    
+    	    	 	        System.out.println("\"A\" :Add New candidate Record ");
+    	    	 	        System.out.println("\"V\" :View All candidate Record ");	
+    	    	 	        System.out.println("\"D\" :Delete candidate Record ");
+    	    	 	        
+    	    	 	        
+    	    	 	        System.out.println("\"Q\" :To Quit Back To Main Menu");
+    	    	 	    
+    	    	 	        System.out.print("\n\n");
+    	    	 	        System.out.println("Enter your choice: ");
+    	    	            String input = getInput();
+    	    	 			
+    	    	            if (input.equalsIgnoreCase("A"))
+    	    	            {
+    	    	                try {
+    	    	 				cAddRecord();
+    	    	 				candidateQuit = false;
+    	    	 			} catch (IOException e) {
+    	    	 				
+    	    	 				e.printStackTrace();
+    	    	 			}
+    	    	            }
+    	    	            else if(input.equalsIgnoreCase("V"))
+    	    	            {
+    	    	                try {
+    	    	 				cViewAllRecord();
+    	    	 				candidateQuit = false;
+    	    	 			} catch (IOException e) {
+    	    	 				
+    	    	 				e.printStackTrace();
+    	    	 			}
+    	    	                
+    	    	                
+    	    	            }
+    	    	            else if(input.equalsIgnoreCase("D"))
+    	    	            {
+    	    	            	try {
+    	    	 				cDeleteRecordByID();
+    	    	 				candidateQuit = false;
+    	    	 			} catch (IOException e) {
+    	    	 				
+    	    	 				e.printStackTrace();
+    	    	 			}
+    	    	            	
+    	    	            }
+    	    	            else if(input.equalsIgnoreCase("U"))
+    	    	            {
+    	    	            	try {
+    	    	 				cupdateRecordbyID();
+    	    	 				candidateQuit = false;
+    	    	 			} catch (IOException e) {
+    	    	 				
+    	    	 				e.printStackTrace();
+    	    	 			}
+    	    	            if(input.equalsIgnoreCase("Q"))
+    	    	            {
+    	    	            		
+    	    	            	  candidateQuit = true;
+    	    	            	
+    	    	            }
+    	    	            	
+    	    	            }
+    	    	            else
+    	    	            {
+    	    	                
+    	    	            System.out.println("Good Bye... : \n\n");
+    	     	            candidateQuit = true;
+    	    	            }
+    	    	        }
+    	    	        return systemQuit;
+    	    	     }
+    	    	         // needs } but then gives error - FIXED
+    	    	         
+    	    	         
+    	    	         //Create setter method add record
+    	    	         public void cAddRecord() throws IOException {
+    	    	     		
+    	    	     		BufferedWriter bw = new BufferedWriter( new FileWriter("candidates.txt",true) );
+    	    	     		Scanner input = new Scanner(System.in);
+    	    	     		
+    	    	     		String ID, name, department;
+    	    	     		int voted = 0,votes = 0;
+    	    	     		
+    	    	     		System.out.print("Enter the candidate ID: ");
+    	    	     		ID = input.nextLine();
+    	    	     		System.out.print("Enter the candidate Name: ");
+    	    	     		name = input.nextLine();
+    	    	     		System.out.print("Enter the candidate Votes: ");
+    	    	     		votes = input.nextInt();
+    	    	     		System.out.print("Enter the candidate Department: ");
+    	    	     		department = input.nextLine();
+    	    	     		    		
+    	    	     		
+    	    	     		bw.write(ID+","+name+","+votes+","+department);
+    	    	     		bw.flush();
+    	    	     		bw.newLine();
+    	    	     		bw.close();	
+    	    	         }
+    	    	     	//Setter Method for veiw record
+    	    	     		public void cViewAllRecord() throws IOException {
+    	    	     	    	BufferedReader br = new BufferedReader( new FileReader("candidates.txt") );
+    	    	     	    		
+    	    	     	    	String record;
+    	    	     	    		
+    	    	     	    	System.out.println("      ------------------------------------------------------------------------------");
+    	    	     	    	System.out.println("      ID	Name   Votes   Department");
+    	    	     	    	System.out.println("      ------------------------------------------------------------------------------");
+    	    	     	    		
+    	    	     	    	while( ( record = br.readLine() ) != null ) {
+    	    	     	    			
+    	    	     	    		StringTokenizer st = new StringTokenizer(record,",");
+    	    	     	    			
+    	    	     	    		System.out.println("      "+st.nextToken()+"	"+st.nextToken()+" 		"+st.nextToken()+"			"+st.nextToken());
+    	    	     		
+    	    	     	    	}
+    	    	     	    		
+    	    	     	    	System.out.println("");
+    	    	     	    	System.out.println(" -------------------------------------------------------------------------------------");
+    	    	     	    	br.close();    		
+    	    	     	    		
+    	    	     	    }
+    	    	     	//Setter method to delete record
+    	    	     		
+    	    	     		public void cDeleteRecordByID() throws IOException {
+    	    	         		Scanner input =  new Scanner(System.in);
+    	    	         		String ID, record;
+    	    	         		
+    	    	         		
+    	    	         		File tempDB = new File("candidate_db_temp.txt");
+    	    	         		File db = new File("candidates.txt");
+    	    	         		
+    	    	         		
+    	    	         		BufferedReader br = new BufferedReader( new FileReader( db ) );
+    	    	         		BufferedWriter bw = new BufferedWriter( new FileWriter( tempDB ) );
+    	    	         		
+    	    	         		
+    	    	         		System.out.println("\t\t Delete candidate Record\n");
+    	    	         		
+    	    	         		System.out.println("Enter the candidate ID: ");
+    	    	         		ID =  input.nextLine();
+    	    	         		
+    	    	         		
+    	    	         		while( ( record = br.readLine() ) != null ) {
+    	    	         			
+    	    	         			
+    	    	         			if( record.contains(ID) ) 
+    	    	         				continue;
+    	    	        
+    	    	         			bw.write(record);
+    	    	         			bw.flush();
+    	    	         			bw.newLine();
+    	    	      
+    	    	         		}
+    	    	         		
+    	    	         		br.close();
+    	    	         		bw.close();
+    	    	         		
+    	    	         		db.delete();
+    	    	         		
+    	    	         		tempDB.renameTo(db);
+
+    	    	         }
+    	    	     	//Setter method for search
+    	    	     		
+    	    	     	//Setter method to update
+    	    	     		public void cupdateRecordbyID() throws IOException {
+    	    	         		String newName, newAge, newAddr, record, ID,record2;
+    	    	         		
+    	    	         		File db = new File("candidates.txt");
+    	    	         		File tempDB = new File("candidate_db_temp.txt");
+    	    	         		
+    	    	         		BufferedReader br = new BufferedReader( new FileReader(db) );
+    	    	         		BufferedWriter bw = new BufferedWriter( new FileWriter(tempDB) );
+    	    	         		    		
+    	    	         		Scanner input = new Scanner(System.in);
+    	    	         		
+    	    	         		System.out.println("\t\t Update candidate Record\n\n");   
+    	    	     			
+    	    	     			System.out.println("Enter the candidate ID: ");
+    	    	     	    		ID = input.nextLine();	    		
+    	    	     	    		System.out.println(" ------------------------------------------------------------------------ ");
+    	    	         	    	System.out.println("|	ID		Name 				Voted			Date 		  Password	 |");
+    	    	         	    	System.out.println(" ------------------------------------------------------------------------ ");
+    	    	     	    		
+    	    	     	    		while( ( record = br.readLine() ) != null ) {
+    	    	     	    			
+    	    	     	    			StringTokenizer st = new StringTokenizer(record,",");
+    	    	     	    			if( record.contains(ID) ) {
+    	    	     	    				System.out.println("|	"+st.nextToken()+"	"+st.nextToken()+" 		"+st.nextToken()+"			"+st.nextToken()+" 		"+st.nextToken()+"      |");
+    	    	     	    			}
+    	    	     	    			//9/10/2017 12.14 pm
+    	    	     	    		}	    		
+    	    	     	    		System.out.println("|	                                            	          |");
+    	    	     	    		System.out.println(" ------------------------------------------------------------- ");
+    	    	     	    		
+    	    	     	    	br.close();
+    	    	     		  	   
+    	    	         		System.out.println("Enter the new Name: ");
+    	    	         		newName = input.nextLine();    		
+    	    	         		System.out.println("Enter the new Age: ");
+    	    	         		newAge = input.nextLine();  
+    	    	         		System.out.println("Enter the new Address: ");
+    	    	         		newAddr = input.nextLine();  
+    	    	         		
+    	    	         		BufferedReader br2 = new BufferedReader( new FileReader(db) );
+    	    	         			
+    	    	         		while( (record2 = br2.readLine() ) != null ) {    			
+    	    	         			if(record2.contains(ID)) {
+    	    	         				bw.write(ID+","+newName+","+newAge+","+newAddr);
+    	    	         			} else {
+    	    	         			
+    	    	         				bw.write(record2);	
+    	    	         			}    			
+    	    	         			bw.flush();
+    	    	         			bw.newLine();
+    	    	         		}
+    	    	         		
+    	    	         		bw.close();
+    	    	         		br2.close();    		
+    	    	         		db.delete();    		
+    	    	         		boolean success = tempDB.renameTo(db);    		
+    	    	         		System.out.println(success);    		
+    	    	         		
+    	    	         }
+    	    	     //+++++++++++++++++NEW Date Manage+++++++++++++++++++++
+    	    	     		public boolean Managedate()
+    	    	    	     {
+    	    	    	        boolean dateQuit = false;
+    	    	    	        boolean systemQuit = false;
+
+    	    	    	        System.out.println("\n\t\t===================== Manage =====================\n\n");
+    	    	    	        
+    	    	    	        while (!dateQuit){
+    	    	    	            System.out.println("\t\t date Information System\n\n");
+    	    	    	 	    
+    	    	    	 	        System.out.println("\"A\" :Add New date Record ");
+    	    	    	 	        System.out.println("\"V\" :View All date Record ");	
+    	    	    	 	        System.out.println("\"D\" :Delete date Record ");
+    	    	    	 	        
+    	    	    	 	        
+    	    	    	 	        System.out.println("\"Q\" :To Quit Back To Main Menu");
+    	    	    	 	    
+    	    	    	 	        System.out.print("\n\n");
+    	    	    	 	        System.out.println("Enter your choice: ");
+    	    	    	            String input = getInput();
+    	    	    	 			
+    	    	    	            if (input.equalsIgnoreCase("A"))
+    	    	    	            {
+    	    	    	                try {
+    	    	    	 				dAddRecord();
+    	    	    	 				dateQuit = false;
+    	    	    	 			} catch (IOException e) {
+    	    	    	 				
+    	    	    	 				e.printStackTrace();
+    	    	    	 			}
+    	    	    	            }
+    	    	    	            else if(input.equalsIgnoreCase("V"))
+    	    	    	            {
+    	    	    	                try {
+    	    	    	 				dViewAllRecord();
+    	    	    	 				dateQuit = false;
+    	    	    	 			} catch (IOException e) {
+    	    	    	 				
+    	    	    	 				e.printStackTrace();
+    	    	    	 			}
+    	    	    	                
+    	    	    	                
+    	    	    	            }
+    	    	    	            else if(input.equalsIgnoreCase("D"))
+    	    	    	            {
+    	    	    	            	try {
+    	    	    	 				dDeleteRecordByID();
+    	    	    	 				dateQuit = false;
+    	    	    	 			} catch (IOException e) {
+    	    	    	 				
+    	    	    	 				e.printStackTrace();
+    	    	    	 			}
+    	    	    	            	
+    	    	    	            }
+    	    	    	            else if(input.equalsIgnoreCase("U"))
+    	    	    	            {
+    	    	    	            	try {
+    	    	    	 				dupdateRecordbyID();
+    	    	    	 				dateQuit = false;
+    	    	    	 			} catch (IOException e) {
+    	    	    	 				
+    	    	    	 				e.printStackTrace();
+    	    	    	 			}
+    	    	    	            if(input.equalsIgnoreCase("Q"))
+    	    	    	            {
+    	    	    	            		
+    	    	    	            	  dateQuit = true;
+    	    	    	            	
+    	    	    	            }
+    	    	    	            	
+    	    	    	            }
+    	    	    	            else
+    	    	    	            {
+    	    	    	                
+    	    	    	            System.out.println("Good Bye... : \n\n");
+    	    	     	            dateQuit = true;
+    	    	    	            }
+    	    	    	        }
+    	    	    	        return systemQuit;
+}
+    	    	    	         // needs } but then gives error - FIXED
+    	    	    	         
+    	    	    	         
+    	    	    	         //Create setter method add record
+    	    	    	         public void dAddRecord() throws IOException {
+    	    	    	     		
+    	    	    	     		BufferedWriter bw = new BufferedWriter( new FileWriter("dates.txt",true) );
+    	    	    	     		Scanner input = new Scanner(System.in);
+    	    	    	     		
+//    	    	    	     		Date startDate;
+//    								Date endDate;
+    								System.out.println("Enter the Date ");
+
+    								String startDateSTR = input.next();
+    								String endDateSTR = input.next();
+
+    								final DateFormat sdf = new SimpleDateFormat("dd/MM/yy");
+    									
+    								
+    								Date startDate = (Date) vc.startDate;
+    								
+    								Date endDate = (Date) vc.endDate;
+    								
+    								try {
+    									//Parsing the String
+    									startDate = (Date) sdf.parse(startDateSTR);
+    									endDate = (Date) sdf.parse(endDateSTR);
+    								} catch (ParseException e) {
+    									
+    									e.printStackTrace();
+    								}
+    								
+    								System.out.println("");
+    								System.out.println(startDate);
+    	    	    	     		System.out.print("Enter the new Start Date: ");
+    	    	    	     		startDateSTR = input.nextLine();
+    								
+    								System.out.println("");
+    								System.out.println(endDate);
+    	    	    	     		System.out.print("Enter the new End Date: ");
+    	    	    	     		endDateSTR = input.nextLine();
+    	    	    	     		
+    								
+    	    	    	     		    		
+    	    	    	     		
+    	    	    	     		bw.write(startDate+","+endDate);
+    	    	    	     		bw.flush();
+    	    	    	     		bw.newLine();
+    	    	    	     		bw.close();	
+    	    	    	         }
+    	    	    	     	
+
+    
+       	
+    	}
+    
+    
+
+
